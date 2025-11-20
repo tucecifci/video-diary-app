@@ -41,7 +41,7 @@ export default function HomeScreen() {
 
         <EmptyVideoList hasVideos={videos.length > 0} />
 
-        <View className="items-center pb-6 pt-4">
+        <View className="items-center pb-12 pt-8">
           <TouchableOpacity
             onPress={handleAddVideo}
             className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-6 py-3 rounded-lg flex-row items-center gap-2"
