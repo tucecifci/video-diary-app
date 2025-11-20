@@ -38,7 +38,15 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you select videos for your diary.",
+          "cameraPermission": "The app accesses your camera to let you record videos for your diary."
+        }
+      ],
+      "expo-trim-video"
     ],
     "experiments": {
       "typedRoutes": true,
