@@ -9,6 +9,7 @@ interface VideoState {
   updateVideo: (id: string, updates: Partial<Video>) => void;
   deleteVideo: (id: string) => void;
   getVideo: (id: string) => Video | undefined;
+  clearAllVideos: () => void;
 }
 
 export const useVideoStore = create<VideoState>()(
@@ -32,6 +33,9 @@ export const useVideoStore = create<VideoState>()(
       getVideo: (id) => {
         const state = get();
         return state.videos.find((video) => video.id === id);
+      },
+      clearAllVideos: () => {
+        set({ videos: [] });
       },
     }),
     {

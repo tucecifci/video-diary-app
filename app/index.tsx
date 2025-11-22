@@ -1,17 +1,66 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { EmptyVideoList } from "@/components/video/EmptyVideoList";
 import { VideoCard } from "@/components/video/VideoCard";
+import { requestGalleryPermission } from "@/lib/permissions";
 import { useVideoStore } from "@/store/videoStore";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { useEffect } from "react";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const router = useRouter();
   const videos = useVideoStore((state) => state.videos);
+  const clearAllVideos = useVideoStore((state) => state.clearAllVideos);
 
-  const handleAddVideo = () => {
-    router.push("/crop");
+  // Eski test verilerini temizle (crop edilmemiş videolar varsa)
+  useEffect(() => {
+    // Eğer videolar varsa ve bunlar crop edilmemişse (originalUri === uri ise) temizle
+    const hasUncroppedVideos = videos.some(
+      (video) => video.originalUri === video.uri
+    );
+
+    if (hasUncroppedVideos && videos.length > 0) {
+      // Eski test verilerini temizle
+      clearAllVideos();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Sadece ilk mount'ta çalış
+
+  const handleAddVideo = async () => {
+    // Galeri iznini kontrol et ve iste
+    const hasPermission = await requestGalleryPermission();
+
+    if (!hasPermission) {
+      // İzin verilmediyse Alert zaten gösterildi, hiçbir şey yapma
+      return;
+    }
+
+    // İzin verildiyse galeriyi aç
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+        allowsEditing: false,
+        quality: 1,
+        videoMaxDuration: 300, // 5 dakika maksimum
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const videoAsset = result.assets[0];
+
+        // Crop ekranına yönlendir (video henüz store'a eklenmedi)
+        router.push({
+          pathname: "/crop",
+          params: { videoUri: videoAsset.uri },
+        });
+      }
+    } catch (error) {
+      console.error("Video seçme hatası:", error);
+      Alert.alert("Hata", "Video seçilirken bir hata oluştu.", [
+        { text: "Tamam" },
+      ]);
+    }
   };
 
   return (
