@@ -14,8 +14,21 @@ export function useVideoPlayback(uri: string) {
       setIsPlaying(player.playing);
     });
 
+    const checkVideoEnd = setInterval(() => {
+      if (
+        player.playing &&
+        player.duration &&
+        player.currentTime !== undefined &&
+        player.currentTime >= player.duration - 0.1
+      ) {
+        player.pause();
+        player.currentTime = 0;
+      }
+    }, 100);
+
     return () => {
       subscription.remove();
+      clearInterval(checkVideoEnd);
     };
   }, [player]);
 
@@ -23,6 +36,13 @@ export function useVideoPlayback(uri: string) {
     if (player.playing) {
       player.pause();
     } else {
+      if (
+        player.duration &&
+        player.currentTime !== undefined &&
+        player.currentTime >= player.duration - 0.1
+      ) {
+        player.currentTime = 0;
+      }
       player.play();
     }
   };
