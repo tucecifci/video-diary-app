@@ -114,7 +114,6 @@ export default function CropScreen() {
           style={StyleSheet.absoluteFill}
           contentFit="contain"
           nativeControls={false}
-          allowsFullscreen={false}
           allowsPictureInPicture={false}
         />
       </View>

@@ -1,5 +1,6 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { VideoNotFound } from "@/components/video/VideoNotFound";
+import { useDeleteVideo } from "@/hooks/useDeleteVideo";
 import { useVideoPlayback } from "@/hooks/useVideoPlayback";
 import { useVideoStore } from "@/store/videoStore";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -15,6 +16,12 @@ export default function VideoDetailScreen() {
   const { player, isPlaying, togglePlay, pause } = useVideoPlayback(
     video?.uri ?? ""
   );
+
+  const { handleDelete } = useDeleteVideo({
+    video,
+    videoId: id,
+    onPause: pause,
+  });
 
   const handleBack = () => {
     pause();
@@ -33,16 +40,21 @@ export default function VideoDetailScreen() {
             <IconSymbol name="chevron.left" size={20} color="white" />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: "/video/editPage",
-              params: { id },
-            } as any)
-          }
-        >
-          <IconSymbol name="square.and.pencil" size={24} color="white" />
-        </TouchableOpacity>
+        <View className="flex-row items-center gap-4">
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: "/video/editPage",
+                params: { id },
+              } as any)
+            }
+          >
+            <IconSymbol name="square.and.pencil" size={24} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleDelete}>
+            <IconSymbol name="trash.fill" size={24} color="#ef4444" />
+          </TouchableOpacity>
+        </View>
       </View>
       <View className="flex-1 px-4 pt-4 pb-6">
         <View className="flex-1 bg-black rounded-3xl overflow-hidden mb-4 border border-white/10">
@@ -50,19 +62,27 @@ export default function VideoDetailScreen() {
             player={player}
             style={{ width: "100%", height: "100%" }}
             contentFit="contain"
-            nativeControls
-            allowsFullscreen
+            nativeControls={false}
             allowsPictureInPicture={false}
           />
           <TouchableOpacity
             onPress={togglePlay}
-            className="absolute inset-0 items-center justify-center bg-black/10"
+            className="absolute inset-0 items-center justify-center"
+            style={{ backgroundColor: "rgba(0,0,0,0.1)" }}
             activeOpacity={0.8}
           >
             {!isPlaying && (
               <IconSymbol name="play.circle.fill" size={64} color="white" />
             )}
           </TouchableOpacity>
+          {isPlaying && (
+            <TouchableOpacity
+              onPress={togglePlay}
+              className="absolute inset-0 items-center justify-center"
+              style={{ backgroundColor: "transparent" }}
+              activeOpacity={1}
+            />
+          )}
         </View>
         <View>
           <Text className="text-white text-2xl font-bold mb-2">

@@ -3,7 +3,7 @@ import { useVideoPlayback } from "@/hooks/useVideoPlayback";
 import { Video } from "@/types/video";
 import { useRouter } from "expo-router";
 import { VideoView } from "expo-video";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Platform, Text, TouchableOpacity, View } from "react-native";
 
 interface VideoCardProps {
   video: Video;
@@ -27,18 +27,27 @@ export function VideoCard({ video }: VideoCardProps) {
 
   return (
     <View className="bg-white dark:bg-gray-800 rounded-lg mb-4 overflow-hidden shadow-sm">
-      <View className="w-full h-48 bg-gray-200 dark:bg-gray-700 relative">
+      <View
+        className={`w-full h-48 relative ${
+          Platform.OS === "android"
+            ? "bg-black dark:bg-black items-center justify-center"
+            : "bg-gray-200 dark:bg-gray-700 overflow-hidden"
+        }`}
+      >
         <VideoView
           player={player}
-          style={{ width: "100%", height: "100%" }}
-          contentFit="cover"
+          style={{
+            width: "100%",
+            height: "100%",
+          }}
+          contentFit={Platform.OS === "android" ? "contain" : "cover"}
           nativeControls={false}
-          allowsFullscreen={false}
           allowsPictureInPicture={false}
         />
         <TouchableOpacity
           onPress={handleVideoPress}
-          className="absolute inset-0 items-center justify-center bg-black/20"
+          className="absolute inset-0 items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.2)" }}
           activeOpacity={0.8}
         >
           {!isPlaying && (
