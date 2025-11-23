@@ -22,6 +22,14 @@ export default function RootLayout() {
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="crop" options={{ headerShown: false }} />
           <Stack.Screen name="crop/metadata" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="video/detailPage"
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="video/editPage"
+            options={{ headerShown: false }}
+          />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>

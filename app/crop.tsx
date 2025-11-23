@@ -11,37 +11,29 @@ export default function CropScreen() {
   const params = useLocalSearchParams<{ videoUri: string }>();
   const [duration, setDuration] = useState(0);
   const [startTime, setStartTime] = useState(0);
-  const [endTime, setEndTime] = useState(5); // Başlangıçta 5 saniye
+  const [endTime, setEndTime] = useState(5);
 
   const player = useVideoPlayer(params.videoUri || "", (player) => {
     player.loop = false;
     player.muted = false;
   });
-
-  // Video yüklendiğinde başlangıç ve bitiş zamanlarını ayarla
   useEffect(() => {
     if (duration > 0) {
-      // Video süresi 5 saniyeden fazlaysa, ilk 5 saniyeyi seç
       if (duration >= 5) {
         setStartTime(0);
         setEndTime(5);
       } else {
-        // Video 5 saniyeden kısaysa, tüm videoyu seç
         setStartTime(0);
         setEndTime(duration);
       }
     }
   }, [duration]);
 
-  // Seçilen segment'i loop olarak oynat
   useEffect(() => {
     if (player.duration && player.currentTime !== undefined) {
-      // Eğer seçilen segment'in dışına çıkarsa, başa dön
       if (player.currentTime < startTime || player.currentTime > endTime) {
         player.currentTime = startTime;
       }
-
-      // Segment'in sonuna geldiğinde başa dön
       if (player.currentTime >= endTime && player.playing) {
         player.currentTime = startTime;
       }
@@ -70,28 +62,22 @@ export default function CropScreen() {
     const newStartTime = Math.max(0, Math.min(value, endTime - 1));
     setStartTime(newStartTime);
 
-    // Eğer endTime ile arası 5 saniyeden fazlaysa, endTime'ı ayarla
     if (endTime - newStartTime > 5) {
       setEndTime(newStartTime + 5);
     }
-
-    // Video'yu yeni başlangıç noktasına al
     player.currentTime = newStartTime;
   };
 
   const handleEndTimeChange = (value: number) => {
     const newEndTime = Math.min(duration, Math.max(value, startTime + 1));
     setEndTime(newEndTime);
-
-    // Eğer startTime ile arası 5 saniyeden fazlaysa, startTime'ı ayarla
     if (newEndTime - startTime > 5) {
       setStartTime(newEndTime - 5);
     }
   };
 
   const selectedDuration = endTime - startTime;
-  const isValidSegment = Math.abs(selectedDuration - 5) < 0.1; // 5 saniye ± 0.1 saniye tolerans
-
+  const isValidSegment = Math.abs(selectedDuration - 5) < 0.1;
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
@@ -134,7 +120,6 @@ export default function CropScreen() {
       </View>
 
       <View className="bg-black/90 px-4 py-6 rounded-t-lg">
-        {/* Segment Seçimi - Başlangıç */}
         <View className="mb-2">
           <Text className="text-white text-xs mb-1">Başlangıç</Text>
           <Slider
@@ -152,7 +137,6 @@ export default function CropScreen() {
           </Text>
         </View>
 
-        {/* Segment Seçimi - Bitiş */}
         <View className="mb-2">
           <Text className="text-white text-xs mb-1">Bitiş</Text>
           <Slider
@@ -168,7 +152,6 @@ export default function CropScreen() {
           <Text className="text-white text-xs mt-1">{formatTime(endTime)}</Text>
         </View>
 
-        {/* Seçilen Segment Bilgisi */}
         <View className="mb-4 items-center">
           <Text className="text-white text-sm">
             Seçilen: {formatTime(startTime)} - {formatTime(endTime)} (
@@ -192,7 +175,6 @@ export default function CropScreen() {
               if (player.playing) {
                 player.pause();
               } else {
-                // Seçilen segment'i oynat
                 player.currentTime = startTime;
                 player.play();
               }
@@ -205,12 +187,9 @@ export default function CropScreen() {
               color="white"
             />
           </TouchableOpacity>
-
-          {/* Next Butonu - Sadece geçerli segment seçildiyse aktif */}
           <TouchableOpacity
             onPress={() => {
               if (isValidSegment) {
-                // Metadata form sayfasına yönlendir
                 router.push({
                   pathname: "/crop/metadata",
                   params: {
