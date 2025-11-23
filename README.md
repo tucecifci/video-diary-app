@@ -26,6 +26,10 @@ The app uses Expo Router, Zustand, and TanStack Query to stay simple, performant
   - Large video player (almost fullscreen, minimal UI)
   - Shows video **name** and **description**
   - Edit icon in the top‑right corner opens the Edit page
+  - Delete icon (trash) allows users to permanently delete videos
+    - Shows a confirmation dialog before deletion
+    - Deletes both the video file and the store entry
+    - Navigates back to Home after successful deletion
 
 - **Crop Flow (3 Steps)**
 
@@ -50,8 +54,15 @@ The app uses Expo Router, Zustand, and TanStack Query to stay simple, performant
     - Adds the new video entry to the Zustand store
 
 - **Edit Page (Bonus)**
+
   - Lets the user edit **Name** and **Description** of a cropped video
   - Persists updates via `updateVideo` in the store (and AsyncStorage)
+
+- **Delete Feature**
+  - Delete button (trash icon) on the Details Page
+  - Confirmation dialog prevents accidental deletions
+  - Removes both the video file from storage and the entry from the store
+  - Implemented via `useDeleteVideo` hook for reusability
 
 ---
 
@@ -140,6 +151,17 @@ These commands build the native dev client and start Metro, so native modules li
 3. Tap **Save**
    - The store entry is updated; both Home and Detail reflect the new values.
 
+### Home → Detail → Delete
+
+1. On Home, tap the text area of a video card
+   - Opens the **Detail Page** with a large player and metadata.
+2. Tap the trash icon (red delete button) in the top‑right
+   - A confirmation dialog appears asking to confirm deletion.
+3. Tap **Sil** (Delete) in the dialog
+   - The video file is deleted from storage.
+   - The video entry is removed from the store.
+   - You are automatically navigated back to Home.
+
 ---
 
 ## Key Files / Structure
@@ -152,9 +174,10 @@ These commands build the native dev client and start Metro, so native modules li
 - `store/videoStore.ts` – Zustand store (videos array, add/update/delete/get)
 - `lib/videoStorage.ts` – Helper functions to persist/delete video files
 - `hooks/useVideoPlayback.ts` – Shared video playback hook (player + isPlaying)
+- `hooks/useDeleteVideo.ts` – Reusable hook for video deletion with confirmation dialog
 - `components/video/VideoCard.tsx` – Video card component used on Home
 - `components/video/VideoMetadataFields.tsx` – Reusable Name/Description fields
-- `components/video/VideoNotFound.tsx` – Shared “video not found / deleted” screen
+- `components/video/VideoNotFound.tsx` – Shared "video not found / deleted" screen
 
 ---
 
