@@ -56,7 +56,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView
       className="flex-1 bg-gray-50 dark:bg-gray-900"
-      edges={["top"]}
+      edges={["top", "bottom"]}
     >
       <View className="bg-white dark:bg-gray-800 px-4 py-6 shadow-sm">
         <View className="flex-row items-center justify-center">
@@ -68,7 +68,8 @@ export default function HomeScreen() {
 
       <ScrollView
         className="flex-1 px-4 pt-4"
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 16 }}
+        showsVerticalScrollIndicator={false}
       >
         {videos.length > 0 && (
           <View className="mb-4">
@@ -79,20 +80,20 @@ export default function HomeScreen() {
         )}
 
         <EmptyVideoList hasVideos={videos.length > 0} />
-
-        <View className="items-center pb-12 pt-8">
-          <TouchableOpacity
-            onPress={handleAddVideo}
-            className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-6 py-3 rounded-lg flex-row items-center gap-2"
-            activeOpacity={0.7}
-          >
-            <IconSymbol name="play.fill" size={16} color="#000" />
-            <Text className="text-gray-900 dark:text-white font-semibold">
-              Add Video
-            </Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
+
+      <View className="px-4 pb-1 pt-3 bg-gray-50 dark:bg-gray-900">
+        <TouchableOpacity
+          onPress={handleAddVideo}
+          className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-6 py-3 rounded-lg flex-row items-center justify-center gap-2"
+          activeOpacity={0.7}
+        >
+          <IconSymbol name="play.fill" size={16} color="#000" />
+          <Text className="text-gray-900 dark:text-white font-semibold">
+            Add Video
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }

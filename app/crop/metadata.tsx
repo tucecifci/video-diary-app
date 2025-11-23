@@ -4,13 +4,13 @@ import {
   Platform,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { VideoMetadataFields } from "@/components/video/VideoMetadataFields";
 import { saveCroppedVideo } from "@/lib/videoStorage";
 import { useVideoStore } from "@/store/videoStore";
 import { useMutation } from "@tanstack/react-query";
@@ -118,43 +118,12 @@ export default function MetadataScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Name Input */}
-          <View className="mb-6">
-            <Text className="text-white text-sm font-semibold mb-2">
-              Video İsmi *
-            </Text>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Video ismini girin"
-              placeholderTextColor="#9ca3af"
-              className="bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700"
-              style={{ color: "#ffffff" }}
-              autoFocus={false}
-              returnKeyType="next"
-              blurOnSubmit={false}
-            />
-          </View>
-
-          {/* Description Input */}
-          <View className="mb-6">
-            <Text className="text-white text-sm font-semibold mb-2">
-              Açıklama
-            </Text>
-            <TextInput
-              value={description}
-              onChangeText={setDescription}
-              placeholder="Video açıklaması (opsiyonel)"
-              placeholderTextColor="#9ca3af"
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-              className="bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 min-h-[100px]"
-              style={{ color: "#ffffff" }}
-              returnKeyType="done"
-              blurOnSubmit={true}
-            />
-          </View>
+          <VideoMetadataFields
+            name={name}
+            description={description}
+            onChangeName={setName}
+            onChangeDescription={setDescription}
+          />
 
           {/* Segment Bilgisi */}
           <View className="mb-6 p-4 bg-gray-800 rounded-lg">
