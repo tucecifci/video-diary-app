@@ -6,7 +6,7 @@ interface EmptyVideoListProps {
 
 export function EmptyVideoList({ hasVideos }: EmptyVideoListProps) {
   if (hasVideos) {
-    return null; // Videolar varsa gösterilmez
+    return null;
   }
 
   return (

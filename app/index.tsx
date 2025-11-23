@@ -13,43 +13,33 @@ export default function HomeScreen() {
   const router = useRouter();
   const videos = useVideoStore((state) => state.videos);
   const clearAllVideos = useVideoStore((state) => state.clearAllVideos);
-
-  // Eski test verilerini temizle (crop edilmemiş videolar varsa)
   useEffect(() => {
-    // Eğer videolar varsa ve bunlar crop edilmemişse (originalUri === uri ise) temizle
     const hasUncroppedVideos = videos.some(
       (video) => video.originalUri === video.uri
     );
 
     if (hasUncroppedVideos && videos.length > 0) {
-      // Eski test verilerini temizle
       clearAllVideos();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Sadece ilk mount'ta çalış
+  }, []);
 
   const handleAddVideo = async () => {
-    // Galeri iznini kontrol et ve iste
     const hasPermission = await requestGalleryPermission();
 
     if (!hasPermission) {
-      // İzin verilmediyse Alert zaten gösterildi, hiçbir şey yapma
       return;
     }
-
-    // İzin verildiyse galeriyi aç
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Videos,
         allowsEditing: false,
         quality: 1,
-        videoMaxDuration: 300, // 5 dakika maksimum
+        videoMaxDuration: 300,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
         const videoAsset = result.assets[0];
-
-        // Crop ekranına yönlendir (video henüz store'a eklenmedi)
         router.push({
           pathname: "/crop",
           params: { videoUri: videoAsset.uri },

@@ -18,7 +18,6 @@ export function VideoCard({ video }: VideoCardProps) {
     player.muted = false;
   });
 
-  // Player durumunu dinle
   useEffect(() => {
     setIsPlaying(player.playing);
 
@@ -40,12 +39,13 @@ export function VideoCard({ video }: VideoCardProps) {
   };
 
   const handleCardPress = () => {
-    // Video oynatılıyorsa durdur
     if (isPlaying) {
       player.pause();
     }
-    // Detay sayfasına git
-    router.push(`/video/${video.id}` as any);
+    router.push({
+      pathname: "/video/detailPage",
+      params: { id: video.id },
+    } as any);
   };
 
   return (
