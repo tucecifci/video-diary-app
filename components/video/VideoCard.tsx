@@ -1,8 +1,8 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useVideoPlayback } from "@/hooks/useVideoPlayback";
 import { Video } from "@/types/video";
 import { useRouter } from "expo-router";
-import { VideoView, useVideoPlayer } from "expo-video";
-import { useEffect, useState } from "react";
+import { VideoView } from "expo-video";
 import { Text, TouchableOpacity, View } from "react-native";
 
 interface VideoCardProps {
@@ -11,37 +11,14 @@ interface VideoCardProps {
 
 export function VideoCard({ video }: VideoCardProps) {
   const router = useRouter();
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const player = useVideoPlayer(video.uri, (player) => {
-    player.loop = false;
-    player.muted = false;
-  });
-
-  useEffect(() => {
-    setIsPlaying(player.playing);
-
-    const subscription = player.addListener("playingChange", () => {
-      setIsPlaying(player.playing);
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, [player]);
+  const { player, isPlaying, togglePlay, pause } = useVideoPlayback(video.uri);
 
   const handleVideoPress = () => {
-    if (isPlaying) {
-      player.pause();
-    } else {
-      player.play();
-    }
+    togglePlay();
   };
 
   const handleCardPress = () => {
-    if (isPlaying) {
-      player.pause();
-    }
+    pause();
     router.push({
       pathname: "/video/detailPage",
       params: { id: video.id },

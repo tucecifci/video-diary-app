@@ -1,8 +1,9 @@
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { VideoNotFound } from "@/components/video/VideoNotFound";
+import { useVideoPlayback } from "@/hooks/useVideoPlayback";
 import { useVideoStore } from "@/store/videoStore";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { VideoView, useVideoPlayer } from "expo-video";
-import { useEffect, useState } from "react";
+import { VideoView } from "expo-video";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -10,43 +11,18 @@ export default function VideoDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const video = useVideoStore((state) => (id ? state.getVideo(id) : undefined));
-  const [isPlaying, setIsPlaying] = useState(false);
-  const player = useVideoPlayer(video?.uri ?? "", (player) => {
-    player.loop = false;
-    player.muted = false;
-  });
 
-  useEffect(() => {
-    const subscription = player.addListener("playingChange", () => {
-      setIsPlaying(player.playing);
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, [player]);
+  const { player, isPlaying, togglePlay, pause } = useVideoPlayback(
+    video?.uri ?? ""
+  );
 
   const handleBack = () => {
-    if (player.playing) {
-      player.pause();
-    }
+    pause();
     router.back();
   };
 
   if (!video) {
-    return (
-      <SafeAreaView className="flex-1 bg-black items-center justify-center">
-        <Text className="text-white text-lg mb-4">
-          Video bulunamadı veya silinmiş.
-        </Text>
-        <TouchableOpacity
-          onPress={handleBack}
-          className="px-4 py-2 rounded-lg bg-gray-800"
-        >
-          <Text className="text-white">Geri dön</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
+    return <VideoNotFound onBack={handleBack} />;
   }
 
   return (
@@ -79,13 +55,7 @@ export default function VideoDetailScreen() {
             allowsPictureInPicture={false}
           />
           <TouchableOpacity
-            onPress={() => {
-              if (isPlaying) {
-                player.pause();
-              } else {
-                player.play();
-              }
-            }}
+            onPress={togglePlay}
             className="absolute inset-0 items-center justify-center bg-black/10"
             activeOpacity={0.8}
           >

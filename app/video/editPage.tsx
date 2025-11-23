@@ -1,18 +1,20 @@
-import { IconSymbol } from "@/components/ui/icon-symbol";
-import { useVideoStore } from "@/store/videoStore";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { VideoMetadataFields } from "@/components/video/VideoMetadataFields";
+import { VideoNotFound } from "@/components/video/VideoNotFound";
+import { useVideoStore } from "@/store/videoStore";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useState } from "react";
 
 export default function VideoEditScreen() {
   const router = useRouter();
@@ -57,19 +59,7 @@ export default function VideoEditScreen() {
   };
 
   if (!video) {
-    return (
-      <SafeAreaView className="flex-1 bg-black items-center justify-center">
-        <Text className="text-white text-lg mb-4">
-          Video bulunamadı veya silinmiş.
-        </Text>
-        <TouchableOpacity
-          onPress={handleBack}
-          className="px-4 py-2 rounded-lg bg-gray-800"
-        >
-          <Text className="text-white">Geri dön</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
+    return <VideoNotFound onBack={handleBack} />;
   }
 
   return (
@@ -92,38 +82,12 @@ export default function VideoEditScreen() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View className="mb-6">
-            <Text className="text-white text-sm font-semibold mb-2">
-              Video İsmi *
-            </Text>
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Video ismini girin"
-              placeholderTextColor="#9ca3af"
-              className="bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700"
-              style={{ color: "#ffffff" }}
-              autoFocus={false}
-              returnKeyType="next"
-            />
-          </View>
-          <View className="mb-6">
-            <Text className="text-white text-sm font-semibold mb-2">
-              Açıklama
-            </Text>
-            <TextInput
-              value={description}
-              onChangeText={setDescription}
-              placeholder="Video açıklaması (opsiyonel)"
-              placeholderTextColor="#9ca3af"
-              multiline
-              numberOfLines={4}
-              textAlignVertical="top"
-              className="bg-gray-800 text-white px-4 py-3 rounded-lg border border-gray-700 min-h-[100px]"
-              style={{ color: "#ffffff" }}
-              returnKeyType="done"
-            />
-          </View>
+          <VideoMetadataFields
+            name={name}
+            description={description}
+            onChangeName={setName}
+            onChangeDescription={setDescription}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
       <View className="bg-black/90 px-4 py-6 rounded-t-lg">
