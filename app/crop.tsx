@@ -9,23 +9,44 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function CropScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ videoUri: string }>();
-  const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [startTime, setStartTime] = useState(0);
+  const [endTime, setEndTime] = useState(5); // Başlangıçta 5 saniye
 
   const player = useVideoPlayer(params.videoUri || "", (player) => {
     player.loop = false;
     player.muted = false;
   });
 
+  // Video yüklendiğinde başlangıç ve bitiş zamanlarını ayarla
   useEffect(() => {
-    if (params.videoUri && player.duration && !player.playing) {
-      const timer = setTimeout(() => {
-        player.play();
-      }, 300);
-
-      return () => clearTimeout(timer);
+    if (duration > 0) {
+      // Video süresi 5 saniyeden fazlaysa, ilk 5 saniyeyi seç
+      if (duration >= 5) {
+        setStartTime(0);
+        setEndTime(5);
+      } else {
+        // Video 5 saniyeden kısaysa, tüm videoyu seç
+        setStartTime(0);
+        setEndTime(duration);
+      }
     }
-  }, [params.videoUri, player.duration, player]);
+  }, [duration]);
+
+  // Seçilen segment'i loop olarak oynat
+  useEffect(() => {
+    if (player.duration && player.currentTime !== undefined) {
+      // Eğer seçilen segment'in dışına çıkarsa, başa dön
+      if (player.currentTime < startTime || player.currentTime > endTime) {
+        player.currentTime = startTime;
+      }
+
+      // Segment'in sonuna geldiğinde başa dön
+      if (player.currentTime >= endTime && player.playing) {
+        player.currentTime = startTime;
+      }
+    }
+  }, [player.currentTime, startTime, endTime, player]);
 
   useEffect(() => {
     const updateDuration = () => {
@@ -45,20 +66,31 @@ export default function CropScreen() {
     };
   }, [player]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (player.currentTime !== undefined) {
-        setCurrentTime(player.currentTime);
-      }
-    }, 100);
+  const handleStartTimeChange = (value: number) => {
+    const newStartTime = Math.max(0, Math.min(value, endTime - 1));
+    setStartTime(newStartTime);
 
-    return () => clearInterval(interval);
-  }, [player]);
+    // Eğer endTime ile arası 5 saniyeden fazlaysa, endTime'ı ayarla
+    if (endTime - newStartTime > 5) {
+      setEndTime(newStartTime + 5);
+    }
 
-  const handleSliderChange = (value: number) => {
-    player.currentTime = value;
-    setCurrentTime(value);
+    // Video'yu yeni başlangıç noktasına al
+    player.currentTime = newStartTime;
   };
+
+  const handleEndTimeChange = (value: number) => {
+    const newEndTime = Math.min(duration, Math.max(value, startTime + 1));
+    setEndTime(newEndTime);
+
+    // Eğer startTime ile arası 5 saniyeden fazlaysa, startTime'ı ayarla
+    if (newEndTime - startTime > 5) {
+      setStartTime(newEndTime - 5);
+    }
+  };
+
+  const selectedDuration = endTime - startTime;
+  const isValidSegment = Math.abs(selectedDuration - 5) < 0.1; // 5 saniye ± 0.1 saniye tolerans
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -102,30 +134,66 @@ export default function CropScreen() {
       </View>
 
       <View className="bg-black/90 px-4 py-6 rounded-t-lg">
-        <View className="mb-4">
+        {/* Segment Seçimi - Başlangıç */}
+        <View className="mb-2">
+          <Text className="text-white text-xs mb-1">Başlangıç</Text>
           <Slider
-            style={{ width: "100%", height: 40 }}
+            style={{ width: "100%", height: 30 }}
             minimumValue={0}
             maximumValue={duration || 1}
-            value={currentTime}
-            onValueChange={handleSliderChange}
-            minimumTrackTintColor="#3b82f6"
+            value={startTime}
+            onValueChange={handleStartTimeChange}
+            minimumTrackTintColor="#10b981"
             maximumTrackTintColor="#4b5563"
-            thumbTintColor="#3b82f6"
+            thumbTintColor="#10b981"
           />
+          <Text className="text-white text-xs mt-1">
+            {formatTime(startTime)}
+          </Text>
         </View>
 
-        <View className="flex-row justify-between items-center mb-4">
-          <Text className="text-white text-sm">{formatTime(currentTime)}</Text>
-          <Text className="text-white text-sm">{formatTime(duration)}</Text>
+        {/* Segment Seçimi - Bitiş */}
+        <View className="mb-2">
+          <Text className="text-white text-xs mb-1">Bitiş</Text>
+          <Slider
+            style={{ width: "100%", height: 30 }}
+            minimumValue={0}
+            maximumValue={duration || 1}
+            value={endTime}
+            onValueChange={handleEndTimeChange}
+            minimumTrackTintColor="#ef4444"
+            maximumTrackTintColor="#4b5563"
+            thumbTintColor="#ef4444"
+          />
+          <Text className="text-white text-xs mt-1">{formatTime(endTime)}</Text>
         </View>
 
-        <View className="items-center">
+        {/* Seçilen Segment Bilgisi */}
+        <View className="mb-4 items-center">
+          <Text className="text-white text-sm">
+            Seçilen: {formatTime(startTime)} - {formatTime(endTime)} (
+            {formatTime(selectedDuration)})
+          </Text>
+          {!isValidSegment && (
+            <Text className="text-yellow-400 text-xs mt-1">
+              ⚠️ Tam 5 saniye seçmelisiniz
+            </Text>
+          )}
+          {isValidSegment && (
+            <Text className="text-green-400 text-xs mt-1">
+              ✓ 5 saniyelik segment seçildi
+            </Text>
+          )}
+        </View>
+
+        <View className="flex-row items-center justify-between">
           <TouchableOpacity
             onPress={() => {
               if (player.playing) {
                 player.pause();
               } else {
+                // Seçilen segment'i oynat
+                player.currentTime = startTime;
                 player.play();
               }
             }}
@@ -136,6 +204,29 @@ export default function CropScreen() {
               size={32}
               color="white"
             />
+          </TouchableOpacity>
+
+          {/* Next Butonu - Sadece geçerli segment seçildiyse aktif */}
+          <TouchableOpacity
+            onPress={() => {
+              if (isValidSegment) {
+                // Metadata form sayfasına yönlendir
+                router.push({
+                  pathname: "/crop/metadata",
+                  params: {
+                    videoUri: params.videoUri || "",
+                    startTime: startTime.toString(),
+                    endTime: endTime.toString(),
+                  },
+                });
+              }
+            }}
+            disabled={!isValidSegment}
+            className={`px-6 py-3 rounded-lg ${
+              isValidSegment ? "bg-blue-500" : "bg-gray-600 opacity-50"
+            }`}
+          >
+            <Text className="text-white font-semibold">Next</Text>
           </TouchableOpacity>
         </View>
       </View>

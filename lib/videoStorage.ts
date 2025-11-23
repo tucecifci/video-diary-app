@@ -1,11 +1,15 @@
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 
 /**
  * Video dosyalarını kalıcı olarak saklamak için kullanılan yardımcı fonksiyonlar
  */
 
-// Video dosyalarının saklanacağı dizin
-const VIDEO_DIRECTORY = `${FileSystem.Paths.document}videos/`;
+// Video dosyalarının saklanacağı dizin (legacy FileSystem API ile, runtime-safe)
+const BASE_DIR =
+  ((FileSystem as any).documentDirectory as string | undefined) ??
+  ((FileSystem as any).cacheDirectory as string | undefined) ??
+  "";
+const VIDEO_DIRECTORY = `${BASE_DIR}videos/`;
 
 /**
  * Video dizinini oluşturur (yoksa)
